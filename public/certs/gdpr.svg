@@ -1,0 +1,22 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GDPR compliant">
+  <defs>
+    <path id="star" d="M0,-5.2 L1.53,-1.6 L4.95,-1.6 L2.04,0.61 L3.06,4.2 L0,2.08 L-3.06,4.2 L-2.04,0.61 L-4.95,-1.6 L-1.53,-1.6 Z" fill="#f2b90c"/>
+  </defs>
+  <circle cx="50" cy="50" r="47" fill="#0b2f7a" stroke="#0a2560" stroke-width="2"/>
+  <g transform="translate(50,50)">
+    <use href="#star" transform="rotate(0) translate(0,-37)"/>
+    <use href="#star" transform="rotate(30) translate(0,-37)"/>
+    <use href="#star" transform="rotate(60) translate(0,-37)"/>
+    <use href="#star" transform="rotate(90) translate(0,-37)"/>
+    <use href="#star" transform="rotate(120) translate(0,-37)"/>
+    <use href="#star" transform="rotate(150) translate(0,-37)"/>
+    <use href="#star" transform="rotate(180) translate(0,-37)"/>
+    <use href="#star" transform="rotate(210) translate(0,-37)"/>
+    <use href="#star" transform="rotate(240) translate(0,-37)"/>
+    <use href="#star" transform="rotate(270) translate(0,-37)"/>
+    <use href="#star" transform="rotate(300) translate(0,-37)"/>
+    <use href="#star" transform="rotate(330) translate(0,-37)"/>
+  </g>
+  <text x="50" y="52" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="800" letter-spacing="0.5" fill="#ffffff">GDPR</text>
+  <text x="50" y="64" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="6" font-weight="600" letter-spacing="2" fill="#c9d6f0">COMPLIANT</text>
+</svg>
