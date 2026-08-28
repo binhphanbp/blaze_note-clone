@@ -2,13 +2,26 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-// Hermite smoothstep easing curve matching note.blaze.vn
-function smoothstep(e: number) {
+// Hermite smoothstep curve
+export function smoothstep(e: number) {
   const n = Math.max(0, Math.min(1, e));
   return n * n * (3 - 2 * n);
 }
 
-function computeProgress(rect: DOMRect, vh: number, start = 0.95, end = 0.35) {
+// Color interpolation from light stone to dark stone (matching note.blaze.vn cw)
+export function interpolateScrollColor(
+  e: number,
+  startRgb = [178, 172, 168],
+  endRgb = [28, 25, 23]
+) {
+  const clamped = Math.max(0, Math.min(1, e));
+  const r = Math.round(startRgb[0] + (endRgb[0] - startRgb[0]) * clamped);
+  const g = Math.round(startRgb[1] + (endRgb[1] - startRgb[1]) * clamped);
+  const b = Math.round(startRgb[2] + (endRgb[2] - startRgb[2]) * clamped);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+export function computeScrollProgress(rect: DOMRect, vh: number, start = 0.95, end = 0.35) {
   const startPx = vh * start;
   const endPx = vh * end;
   if (Math.abs(startPx - endPx) < 1) return 1;
@@ -16,183 +29,106 @@ function computeProgress(rect: DOMRect, vh: number, start = 0.95, end = 0.35) {
   return Math.max(0, Math.min(1, raw));
 }
 
-interface RevealOptions {
-  start?: number; // viewport percentage when effect starts (e.g. 0.95 = 95% from top)
-  end?: number;   // viewport percentage when effect completes (e.g. 0.35 = 35% from top)
-  damp?: number;  // damping factor (e.g. 0.12 - 0.16 for smooth inertia)
-  y?: number;     // initial translateY offset (px)
-  x?: number;     // initial translateX offset (px)
-  minOpacity?: number; // initial opacity (e.g. 0.25 - 0.5)
-  scaleFrom?: number;  // initial scale (e.g. 0.985)
-  stagger?: number;
-  staggerSpan?: number;
+export interface TransformOptions {
+  y?: number;
+  x?: number;
+  minOpacity?: number;
+  scaleFrom?: number;
 }
 
-const defaultOptions: Required<RevealOptions> = {
-  start: 0.95,
-  end: 0.38,
-  damp: 0.12,
-  y: 28,
-  x: 0,
-  minOpacity: 0.3,
-  scaleFrom: 0.985,
-  stagger: 0,
-  staggerSpan: 0.5
-};
-
-interface ElementConfig extends Required<RevealOptions> {
-  el: HTMLElement;
-  _cur: number;
-  _sig: string;
-}
-
-const observedElements = new Set<ElementConfig>();
-let rafId = 0;
-let isRunning = false;
-let isListenerActive = false;
-
-function applyTransform(cfg: ElementConfig, progress: number) {
+export function computeTransformStyle(progress: number, opts: TransformOptions = {}) {
+  const y = opts.y ?? 28;
+  const x = opts.x ?? 0;
+  const minOpacity = opts.minOpacity ?? 0.28;
+  const scaleFrom = opts.scaleFrom ?? 0.985;
   const eased = smoothstep(progress);
-  const transY = (1 - eased) * cfg.y;
-  const transX = (1 - eased) * cfg.x;
-  const scale = cfg.scaleFrom + (1 - cfg.scaleFrom) * eased;
-  const opacity = cfg.minOpacity + (1 - cfg.minOpacity) * eased;
 
-  const sig = `${transY.toFixed(2)}|${transX.toFixed(2)}|${scale.toFixed(4)}|${opacity.toFixed(3)}`;
-  if (sig !== cfg._sig) {
-    cfg._sig = sig;
-    cfg.el.style.transform = `translate3d(${transX.toFixed(2)}px, ${transY.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
-    cfg.el.style.opacity = opacity.toFixed(3);
-  }
+  return {
+    opacity: Number((minOpacity + (1 - minOpacity) * eased).toFixed(3)),
+    transform: `translate3d(${((1 - eased) * x).toFixed(2)}px, ${((1 - eased) * y).toFixed(2)}px, 0) scale(${(
+      scaleFrom +
+      (1 - scaleFrom) * eased
+    ).toFixed(4)})`,
+    willChange: 'transform, opacity'
+  };
 }
 
-function updateFrame() {
-  rafId = 0;
-  if (observedElements.size === 0) {
-    isRunning = false;
-    return;
-  }
+// Hook to track smooth damped scroll progress of a container
+export function useScrollProgress(options: { start?: number; end?: number; damp?: number } = {}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [progress, setProgress] = useState(1);
 
-  const vh = window.innerHeight || 1;
-  let hasActiveTransitions = false;
-
-  for (const cfg of Array.from(observedElements)) {
-    const rect = cfg.el.getBoundingClientRect();
-
-    // Out of view above
-    if (rect.bottom < -80 && cfg._cur > 0.995) {
-      if (cfg._cur !== 1) {
-        cfg._cur = 1;
-        applyTransform(cfg, 1);
-      }
-      continue;
-    }
-
-    // Out of view below
-    if (rect.top > vh + 120 && cfg._cur < 0.005) {
-      if (cfg._cur !== 0) {
-        cfg._cur = 0;
-        applyTransform(cfg, 0);
-      }
-      continue;
-    }
-
-    const targetProgress = computeProgress(rect, vh, cfg.start, cfg.end);
-    const damp = cfg.damp;
-    const nextVal = cfg._cur + (targetProgress - cfg._cur) * damp;
-
-    cfg._cur = Math.abs(targetProgress - nextVal) < 0.0015 ? targetProgress : nextVal;
-    applyTransform(cfg, cfg._cur);
-
-    if (Math.abs(targetProgress - cfg._cur) >= 0.0015) {
-      hasActiveTransitions = true;
-    }
-  }
-
-  if (hasActiveTransitions) {
-    rafId = requestAnimationFrame(updateFrame);
-  } else {
-    isRunning = false;
-  }
-}
-
-function triggerUpdate() {
-  if (typeof window === 'undefined') return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if (!isRunning) {
-    isRunning = true;
-    rafId = requestAnimationFrame(updateFrame);
-  }
-}
-
-function startGlobalListeners() {
-  if (isListenerActive || typeof window === 'undefined') return;
-  isListenerActive = true;
-  window.addEventListener('scroll', triggerUpdate, { passive: true });
-  window.addEventListener('resize', triggerUpdate, { passive: true });
-}
-
-function stopGlobalListeners() {
-  if (observedElements.size > 0 || !isListenerActive) return;
-  window.removeEventListener('scroll', triggerUpdate);
-  window.removeEventListener('resize', triggerUpdate);
-  isListenerActive = false;
-  if (rafId) cancelAnimationFrame(rafId);
-  rafId = 0;
-  isRunning = false;
-}
-
-// Hook to attach scroll reveal to an element ref
-export function useScrollReveal(options: RevealOptions = {}) {
-  const elementRef = useRef<HTMLElement | null>(null);
-  const optionsRef = useRef(options);
-  optionsRef.current = options;
+  const start = options.start ?? 0.95;
+  const end = options.end ?? 0.35;
+  const damp = options.damp ?? 0.14;
 
   useEffect(() => {
-    const el = elementRef.current;
+    const el = ref.current;
     if (!el || typeof window === 'undefined') return;
-
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      el.style.opacity = '1';
-      el.style.transform = 'none';
+      setProgress(1);
       return;
     }
 
-    const cfg: ElementConfig = {
-      el,
-      start: optionsRef.current.start ?? defaultOptions.start,
-      end: optionsRef.current.end ?? defaultOptions.end,
-      damp: optionsRef.current.damp ?? defaultOptions.damp,
-      y: optionsRef.current.y ?? defaultOptions.y,
-      x: optionsRef.current.x ?? defaultOptions.x,
-      minOpacity: optionsRef.current.minOpacity ?? defaultOptions.minOpacity,
-      scaleFrom: optionsRef.current.scaleFrom ?? defaultOptions.scaleFrom,
-      stagger: optionsRef.current.stagger ?? defaultOptions.stagger,
-      staggerSpan: optionsRef.current.staggerSpan ?? defaultOptions.staggerSpan,
-      _cur: 0,
-      _sig: ''
+    let cur = 0;
+    let rafId = 0;
+    let isActive = true;
+
+    const update = () => {
+      rafId = 0;
+      if (!isActive) return;
+
+      const vh = window.innerHeight || 1;
+      const target = computeScrollProgress(el.getBoundingClientRect(), vh, start, end);
+      cur += (target - cur) * damp;
+
+      if (Math.abs(target - cur) < 0.0015) cur = target;
+      setProgress(cur);
+
+      if (Math.abs(target - cur) >= 0.0015) {
+        rafId = requestAnimationFrame(update);
+      }
     };
 
-    el.style.willChange = 'transform, opacity';
-    observedElements.add(cfg);
-    startGlobalListeners();
+    const onScroll = () => {
+      if (!rafId) rafId = requestAnimationFrame(update);
+    };
 
-    const vh = window.innerHeight || 1;
-    cfg._cur = computeProgress(el.getBoundingClientRect(), vh, cfg.start, cfg.end);
-    applyTransform(cfg, cfg._cur);
-    triggerUpdate();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    cur = computeScrollProgress(el.getBoundingClientRect(), window.innerHeight || 1, start, end);
+    setProgress(cur);
+    onScroll();
 
     return () => {
-      observedElements.delete(cfg);
-      el.style.willChange = '';
-      stopGlobalListeners();
+      isActive = false;
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [start, end, damp]);
 
-  return elementRef;
+  return [ref, progress] as const;
 }
 
-// Hook for gentle parallax offset
+// Hook for multi-item staggered wave animation
+export function useStagger(
+  count: number,
+  staggerOffset = 0.11,
+  span = 0.5,
+  options: { start?: number; end?: number; damp?: number } = {}
+) {
+  const [ref, overallProgress] = useScrollProgress(options);
+
+  const itemProgressList = Array.from({ length: count }, (_, idx) => {
+    const raw = Math.max(0, Math.min(1, (overallProgress - idx * staggerOffset) / span));
+    return smoothstep(raw);
+  });
+
+  return [ref, itemProgressList, overallProgress] as const;
+}
+
+// Hook for parallax
 export function useParallax(speed = 20) {
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -212,8 +148,8 @@ export function useParallax(speed = 20) {
 
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight || 1;
-      const progress = (rect.top + rect.height * 0.5 - vh * 0.5) / vh;
-      targetY = progress * speed;
+      const p = (rect.top + rect.height * 0.5 - vh * 0.5) / vh;
+      targetY = p * speed;
 
       currentY += (targetY - currentY) * 0.12;
       if (Math.abs(targetY - currentY) < 0.05) currentY = targetY;
@@ -243,6 +179,89 @@ export function useParallax(speed = 20) {
       el.style.transform = '';
     };
   }, [speed]);
+
+  return ref;
+}
+
+// General ScrollReveal hook
+export function useScrollReveal(options: {
+  start?: number;
+  end?: number;
+  damp?: number;
+  y?: number;
+  x?: number;
+  minOpacity?: number;
+  scaleFrom?: number;
+} = {}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  const start = options.start ?? 0.95;
+  const end = options.end ?? 0.38;
+  const damp = options.damp ?? 0.14;
+  const y = options.y ?? 28;
+  const x = options.x ?? 0;
+  const minOpacity = options.minOpacity ?? 0.3;
+  const scaleFrom = options.scaleFrom ?? 0.985;
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+      return;
+    }
+
+    let cur = 0;
+    let rafId = 0;
+    let isActive = true;
+
+    const apply = (p: number) => {
+      const eased = smoothstep(p);
+      const transY = (1 - eased) * y;
+      const transX = (1 - eased) * x;
+      const scale = scaleFrom + (1 - scaleFrom) * eased;
+      const op = minOpacity + (1 - minOpacity) * eased;
+
+      el.style.transform = `translate3d(${transX.toFixed(2)}px, ${transY.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`;
+      el.style.opacity = op.toFixed(3);
+    };
+
+    const update = () => {
+      rafId = 0;
+      if (!isActive) return;
+
+      const vh = window.innerHeight || 1;
+      const target = computeScrollProgress(el.getBoundingClientRect(), vh, start, end);
+      cur += (target - cur) * damp;
+
+      if (Math.abs(target - cur) < 0.0015) cur = target;
+      apply(cur);
+
+      if (Math.abs(target - cur) >= 0.0015) {
+        rafId = requestAnimationFrame(update);
+      }
+    };
+
+    const onScroll = () => {
+      if (!rafId) rafId = requestAnimationFrame(update);
+    };
+
+    el.style.willChange = 'transform, opacity';
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    cur = computeScrollProgress(el.getBoundingClientRect(), window.innerHeight || 1, start, end);
+    apply(cur);
+    onScroll();
+
+    return () => {
+      isActive = false;
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+      el.style.willChange = '';
+    };
+  }, [start, end, damp, y, x, minOpacity, scaleFrom]);
 
   return ref;
 }

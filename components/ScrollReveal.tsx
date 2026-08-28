@@ -15,8 +15,6 @@ interface ScrollRevealProps {
   start?: number;
   end?: number;
   damp?: number;
-  stagger?: number;
-  staggerSpan?: number;
 }
 
 export default function ScrollReveal({
@@ -30,9 +28,7 @@ export default function ScrollReveal({
   scaleFrom = 0.985,
   start = 0.95,
   end = 0.38,
-  damp = 0.12,
-  stagger = 0,
-  staggerSpan = 0.5
+  damp = 0.12
 }: ScrollRevealProps) {
   const ref = useScrollReveal({
     y,
@@ -41,9 +37,7 @@ export default function ScrollReveal({
     scaleFrom,
     start,
     end,
-    damp,
-    stagger,
-    staggerSpan
+    damp
   });
 
   return (
