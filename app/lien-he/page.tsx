@@ -1,243 +1,260 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle2, MessageSquare, Building2, Clock } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle2, Building, MessageSquare, Sparkles } from 'lucide-react';
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    company: '',
-    message: ''
-  });
-  const [submitted, setSubmitted] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [company, setCompany] = useState('');
+  const [subject, setSubject] = useState('enterprise');
+  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success'>('idle');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (status === 'sending') return;
+    setStatus('sending');
+
+    setTimeout(() => {
+      setStatus('success');
+      setName('');
+      setEmail('');
+      setPhone('');
+      setCompany('');
+      setMessage('');
+      setTimeout(() => setStatus('idle'), 5000);
+    }, 1000);
   };
 
+  const inputStyle =
+    'w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-[14px] text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all';
+
   return (
-    <div className="pt-24 pb-20 overflow-x-hidden min-h-screen bg-stone-50/30">
-      <div className="max-w-6xl mx-auto px-6 sm:px-10">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-4 border border-emerald-200/80">
-            <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-            Kết nối với chúng tôi
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-stone-900 leading-tight">
-            Liên hệ &amp; Tư vấn giải pháp
+    <div className="bg-white text-stone-800 selection:bg-emerald-500/15 overflow-x-hidden pt-16 min-h-screen">
+      {/* 1. Header Section */}
+      <section className="border-b border-stone-200">
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 py-14 lg:py-20">
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-light tracking-tight text-stone-900 leading-tight">
+            Liên hệ với chúng tôi
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-stone-600 font-medium">
-            Đội ngũ chuyên gia Blaze Note luôn sẵn sàng hỗ trợ giải đáp mọi nhu cầu về Voice AI và tích hợp doanh nghiệp.
+          <p className="mt-4 text-[15px] sm:text-base font-normal text-stone-500 max-w-2xl leading-relaxed">
+            Đội ngũ Blaze Note luôn sẵn sàng hỗ trợ tư vấn giải pháp, tích hợp API và giải đáp mọi yêu cầu triển khai của doanh nghiệp.
           </p>
         </div>
+      </section>
 
-        <div className="grid lg:grid-cols-12 gap-10">
-          {/* Left Info & Offices (5 cols) */}
-          <div className="lg:col-span-5 space-y-6">
-            {/* Quick Contact Card */}
-            <div className="rounded-3xl bg-white border border-stone-200 p-7 shadow-sm space-y-5">
-              <h3 className="text-lg font-bold text-stone-900 border-b border-stone-100 pb-3">
-                Kênh liên hệ trực tiếp
-              </h3>
-
-              <div className="space-y-4 text-sm">
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700 shrink-0">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-stone-400 uppercase">Hợp tác & Kinh doanh</div>
-                    <a href="mailto:contact@blaze.vn" className="font-semibold text-stone-800 hover:text-emerald-700 transition">
-                      contact@blaze.vn
+      {/* 2. Content 2-column Grid */}
+      <section className="border-b border-stone-200">
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 py-12 lg:py-16">
+          <div className="grid lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.15fr)] gap-10 lg:gap-14 items-start">
+            {/* Left: Contact Info & Offices */}
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-lg font-bold text-stone-900 mb-4">
+                  Kênh liên hệ trực tiếp
+                </h2>
+                <ul className="space-y-3">
+                  <li>
+                    <a
+                      href="mailto:contact@blaze.vn"
+                      className="flex items-start gap-3.5 rounded-2xl border border-stone-200 bg-white p-4 hover:border-emerald-300 hover:bg-emerald-50/40 transition-all"
+                    >
+                      <span className="grid place-items-center w-10 h-10 rounded-xl bg-stone-50 border border-stone-100 text-emerald-600 shrink-0">
+                        <Mail className="w-5 h-5" />
+                      </span>
+                      <span className="min-w-0 pt-0.5">
+                        <span className="block text-[12px] font-semibold text-stone-400">
+                          Hợp tác & Đối tác
+                        </span>
+                        <span className="block text-[15px] font-bold text-stone-900 break-all">
+                          contact@blaze.vn
+                        </span>
+                      </span>
                     </a>
-                  </div>
-                </div>
+                  </li>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700 shrink-0">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-stone-400 uppercase">Hỗ trợ Kỹ thuật & API</div>
-                    <a href="mailto:manhp@actable.ai" className="font-semibold text-stone-800 hover:text-emerald-700 transition">
-                      manhp@actable.ai
+                  <li>
+                    <a
+                      href="mailto:sales@blaze.vn"
+                      className="flex items-start gap-3.5 rounded-2xl border border-stone-200 bg-white p-4 hover:border-emerald-300 hover:bg-emerald-50/40 transition-all"
+                    >
+                      <span className="grid place-items-center w-10 h-10 rounded-xl bg-stone-50 border border-stone-100 text-emerald-600 shrink-0">
+                        <Building className="w-5 h-5" />
+                      </span>
+                      <span className="min-w-0 pt-0.5">
+                        <span className="block text-[12px] font-semibold text-stone-400">
+                          Tư vấn Doanh nghiệp & API
+                        </span>
+                        <span className="block text-[15px] font-bold text-stone-900 break-all">
+                          sales@blaze.vn
+                        </span>
+                      </span>
                     </a>
-                  </div>
-                </div>
+                  </li>
+                </ul>
+              </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700 shrink-0">
-                    <Clock className="w-4 h-4" />
+              {/* Office Locations */}
+              <div>
+                <h2 className="text-lg font-bold text-stone-900 mb-4">
+                  Văn phòng làm việc
+                </h2>
+                <div className="space-y-3.5">
+                  <div className="rounded-2xl border border-stone-200 bg-stone-50/50 p-5 space-y-1.5">
+                    <div className="flex items-center gap-2 text-stone-900 font-bold text-sm">
+                      <MapPin className="w-4 h-4 text-emerald-600" />
+                      <span>Trụ sở Hà Nội</span>
+                    </div>
+                    <p className="text-xs sm:text-[13px] text-stone-600 leading-relaxed">
+                      Tầng 6, Tòa nhà Detech, Số 8 Tôn Thất Thuyết, Phường Mỹ Đình 2, Quận Nam Từ Liêm, TP. Hà Nội
+                    </p>
                   </div>
-                  <div>
-                    <div className="text-xs font-bold text-stone-400 uppercase">Thời gian làm việc</div>
-                    <p className="font-semibold text-stone-800">
-                      Thứ Hai – Thứ Sáu (08:30 – 18:00)
+
+                  <div className="rounded-2xl border border-stone-200 bg-stone-50/50 p-5 space-y-1.5">
+                    <div className="flex items-center gap-2 text-stone-900 font-bold text-sm">
+                      <MapPin className="w-4 h-4 text-emerald-600" />
+                      <span>Văn phòng Đà Nẵng</span>
+                    </div>
+                    <p className="text-xs sm:text-[13px] text-stone-600 leading-relaxed">
+                      Tầng 4, Tòa nhà ACB, 218 Bạch Đằng, Phường Phước Ninh, Quận Hải Châu, TP. Đà Nẵng
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Office Locations */}
-            <div className="rounded-3xl bg-white border border-stone-200 p-7 shadow-sm space-y-5">
-              <h3 className="text-lg font-bold text-stone-900 border-b border-stone-100 pb-3">
-                Văn phòng đại diện
-              </h3>
-
-              <div className="space-y-5 text-sm">
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700 shrink-0 mt-0.5">
-                    <Building2 className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-stone-900">Trụ sở Hà Nội</h4>
-                    <p className="text-stone-600 mt-0.5 leading-relaxed text-xs">
-                      Tầng 10, Tòa nhà VET, số 98 Hoàng Quốc Việt, Quận Cầu Giấy, Hà Nội
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 pt-3 border-t border-stone-100">
-                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-700 shrink-0 mt-0.5">
-                    <Building2 className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-stone-900">Chi nhánh Đà Nẵng</h4>
-                    <p className="text-stone-600 mt-0.5 leading-relaxed text-xs">
-                      Tầng 4, Tòa nhà 10B, Công viên phần mềm số 2, Đường Như Nguyệt, Quận Hải Châu, Đà Nẵng
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Form (7 cols) */}
-          <div className="lg:col-span-7">
-            <div className="rounded-3xl bg-white border border-stone-200 p-8 sm:p-10 shadow-sm">
-              <h3 className="text-2xl font-bold text-stone-900 mb-2">
-                Gửi lời nhắn cho chúng tôi
-              </h3>
-              <p className="text-sm text-stone-500 font-medium mb-8">
-                Điền thông tin bên dưới và chuyên viên tư vấn của Blaze Note sẽ liên hệ lại trong vòng 2 giờ làm việc.
+            {/* Right: Contact Form */}
+            <div className="rounded-3xl border border-stone-200 bg-white p-7 sm:p-9 shadow-sm">
+              <h2 className="text-xl font-bold text-stone-900 mb-2">
+                Gửi yêu cầu tư vấn
+              </h2>
+              <p className="text-stone-500 text-xs sm:text-sm mb-6">
+                Điền thông tin bên dưới, chuyên viên của Blaze Note sẽ liên hệ lại trong vòng 2 giờ làm việc.
               </p>
 
-              {submitted ? (
-                <div className="text-center py-12 space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-                    <CheckCircle2 className="w-8 h-8" />
-                  </div>
-                  <h4 className="text-xl font-bold text-stone-900">
-                    Cảm ơn bạn đã liên hệ!
+              {status === 'success' ? (
+                <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-2 animate-in fade-in">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
+                  <h4 className="text-base font-bold text-emerald-900">
+                    Gửi yêu cầu thành công!
                   </h4>
-                  <p className="text-sm text-stone-600 max-w-md mx-auto leading-relaxed">
-                    Chúng tôi đã tiếp nhận thông tin từ bạn ({formData.email}) và sẽ phản hồi qua email/số điện thoại trong thời gian sớm nhất.
+                  <p className="text-xs text-emerald-700 font-medium">
+                    Cảm ơn bạn đã quan tâm. Chúng tôi sẽ phản hồi qua email hoặc số điện thoại sớm nhất.
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSubmitted(false);
-                      setFormData({ fullName: '', email: '', phone: '', company: '', message: '' });
-                    }}
-                    className="mt-4 px-6 py-2.5 rounded-full bg-emerald-600 text-white font-semibold text-sm hover:bg-emerald-700 transition"
-                  >
-                    Gửi lời nhắn khác
-                  </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-semibold text-stone-700 mb-1.5">
                         Họ và tên *
                       </label>
                       <input
                         type="text"
                         required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                         placeholder="Nguyễn Văn A"
-                        value={formData.fullName}
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition text-sm"
+                        className={inputStyle}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-semibold text-stone-700 mb-1.5">
                         Email công việc *
                       </label>
                       <input
                         type="email"
                         required
-                        placeholder="a.nguyen@company.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition text-sm"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="name@company.com"
+                        className={inputStyle}
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-semibold text-stone-700 mb-1.5">
                         Số điện thoại
                       </label>
                       <input
                         type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                         placeholder="0912 345 678"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition text-sm"
+                        className={inputStyle}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
-                        Tên doanh nghiệp / Tổ chức
+                      <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                        Tên công ty / Tổ chức
                       </label>
                       <input
                         type="text"
-                        placeholder="Tập đoàn ABC"
-                        value={formData.company}
-                        onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition text-sm"
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                        placeholder="Công ty Cổ phần ABC"
+                        className={inputStyle}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
-                      Nhu cầu hoặc câu hỏi của bạn *
+                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                      Nhu cầu cần hỗ trợ
+                    </label>
+                    <select
+                      value={subject}
+                      onChange={(e) => setSubject(e.target.value)}
+                      className={inputStyle}
+                    >
+                      <option value="enterprise">Tư vấn gói Doanh nghiệp (Private Cloud / On-premise)</option>
+                      <option value="api">Tích hợp Meeting API & Voice SDK</option>
+                      <option value="workspace">Đăng ký gói Workspace cho Nhóm</option>
+                      <option value="partnership">Đề xuất hợp tác kinh doanh</option>
+                      <option value="other">Hỗ trợ kỹ thuật khác</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 mb-1.5">
+                      Nội dung chi tiết *
                     </label>
                     <textarea
                       required
                       rows={4}
-                      placeholder="Mô tả số lượng người dùng cần triển khai, nhu cầu tích hợp API, hoặc thắc mắc cần hỗ trợ..."
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition text-sm resize-none"
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Mô tả số lượng người dùng dự kiến, nhu cầu tính năng hoặc yêu cầu bảo mật..."
+                      className={inputStyle}
                     />
                   </div>
 
-                  <div className="pt-2">
-                    <button
-                      type="submit"
-                      className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition active:scale-95"
-                    >
-                      <span>Gửi yêu cầu tư vấn</span>
-                      <Send className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    type="submit"
+                    disabled={status === 'sending'}
+                    className="w-full py-3.5 rounded-full bg-stone-900 text-white text-sm font-bold hover:bg-emerald-600 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"
+                  >
+                    {status === 'sending' ? (
+                      <span>Đang gửi thông tin...</span>
+                    ) : (
+                      <>
+                        <span>Gửi thông tin liên hệ</span>
+                        <Send className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
                 </form>
               )}
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

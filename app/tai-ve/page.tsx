@@ -1,146 +1,148 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Download, Monitor, Laptop, CheckCircle2, ShieldCheck, Sparkles, Command, Zap } from 'lucide-react';
+import { Download, Monitor, Laptop, CheckCircle2, ShieldCheck, Zap, Command, Layers } from 'lucide-react';
 
 export default function DownloadPage() {
+  const [downloadingPlatform, setDownloadingPlatform] = useState<string | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
 
-  const handleDownload = (osName: string) => {
-    setDownloadSuccess(`Đang chuẩn bị tải bản cài đặt cho ${osName}...`);
-    setTimeout(() => setDownloadSuccess(null), 4000);
-  };
-
-  const platforms = [
+  const builds = [
     {
-      os: 'macOS',
-      icon: Laptop,
-      version: 'Phiên bản 2.4.0 (Universal)',
-      requires: 'macOS 12.0 (Monterey) trở lên',
-      options: [
-        { label: 'Tải cho Apple Silicon (M1/M2/M3/M4)', file: 'BlazeNote-mac-arm64.dmg' },
-        { label: 'Tải cho Intel Chip', file: 'BlazeNote-mac-x64.dmg' }
-      ]
+      platform: 'mac-arm64',
+      name: 'macOS · Apple Silicon',
+      sub: 'M1 / M2 / M3 / M4 chip',
+      filename: 'BlazeNote-2.4.0-arm64.dmg',
+      size: '84.2 MB',
+      isRecommended: true
     },
     {
-      os: 'Windows',
-      icon: Monitor,
-      version: 'Phiên bản 2.4.0 (x64 / ARM64)',
-      requires: 'Windows 10 hoặc Windows 11 (64-bit)',
-      options: [
-        { label: 'Tải bản cài đặt chuẩn (.exe)', file: 'BlazeNote-Setup-x64.exe' },
-        { label: 'Tải bản Doanh nghiệp (.msi)', file: 'BlazeNote-Enterprise.msi' }
-      ]
+      platform: 'mac-x64',
+      name: 'macOS · Intel',
+      sub: 'Intel x64 chip',
+      filename: 'BlazeNote-2.4.0-x64.dmg',
+      size: '88.6 MB',
+      isRecommended: false
+    },
+    {
+      platform: 'win-x64',
+      name: 'Windows 10/11 · 64-bit',
+      sub: 'x64 installer (.exe)',
+      filename: 'BlazeNote-Setup-2.4.0.exe',
+      size: '76.4 MB',
+      isRecommended: true
     }
   ];
 
-  const highlights = [
+  const handleDownload = (b: typeof builds[0]) => {
+    setDownloadingPlatform(b.platform);
+    setDownloadSuccess(`Đang tải ${b.filename} (${b.size})...`);
+    setTimeout(() => {
+      setDownloadingPlatform(null);
+      setTimeout(() => setDownloadSuccess(null), 3000);
+    }, 1200);
+  };
+
+  const featureCards = [
     {
       icon: Zap,
       title: 'Lưu ngay trên máy',
-      desc: 'Tốc độ phản hồi tức thì, bộ nhớ đệm an toàn và đồng bộ mượt mà khi có mạng.'
+      desc: 'Toàn bộ dữ liệu ghi âm và biên bản được xử lý với độ trễ cực thấp, lưu trữ an toàn trong bộ nhớ đệm cục bộ và đồng bộ khi có kết nối mạng.'
     },
     {
-      icon: Sparkles,
+      icon: Layers,
       title: 'Caption phủ toàn màn hình',
-      desc: 'Cửa sổ phụ đề nổi (Floating overlay) hiển thị trên đầu Zoom, Google Meet hay video YouTube.'
+      desc: 'Cửa sổ phụ đề nổi (Floating overlay) hiển thị trên đầu Zoom, Teams, Google Meet, YouTube hay bất kỳ ứng dụng nào khác.'
     },
     {
       icon: Command,
-      title: 'Phím tắt toàn hệ thống',
-      desc: 'Bắt đầu ghi âm hoặc dịch thuật ngay lập tức với phím tắt Cmd+Shift+Space (macOS) hoặc Ctrl+Shift+Space (Windows).'
+      title: 'Mở nhanh như ứng dụng thật',
+      desc: 'Kích hoạt ngay bằng phím tắt toàn hệ thống Cmd+Shift+Space (macOS) hoặc Ctrl+Shift+Space (Windows) để ghi âm trong 1 giây.'
     }
   ];
 
   return (
-    <div className="pt-24 pb-20 overflow-x-hidden min-h-screen bg-stone-50/30">
-      <div className="max-w-6xl mx-auto px-6 sm:px-10">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-4 border border-emerald-200/80">
-            <Download className="w-3.5 h-3.5 text-emerald-600" />
-            Desktop App
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-stone-900 leading-tight">
-            Tải ứng dụng máy tính (macOS &amp; Windows)
+    <div className="bg-white text-stone-800 selection:bg-emerald-500/15 overflow-x-hidden pt-16 min-h-screen">
+      {/* 1. Header Section */}
+      <section className="border-b border-stone-200">
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 py-14 lg:py-20">
+          <h1 className="text-3xl sm:text-4xl lg:text-[2.5rem] font-light tracking-tight text-stone-900 leading-tight">
+            Tải ứng dụng máy tính
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-stone-600 font-medium">
-            Trải nghiệm ghi âm và dịch thuật đỉnh cao với ứng dụng native, độ trễ cực thấp và phụ đề nổi thông minh.
+          <p className="mt-4 text-[15px] sm:text-base font-normal text-stone-500 max-w-2xl leading-relaxed">
+            Bản cài đặt cho macOS và Windows: ghi âm, phiên dịch và biên bản ngay trên máy, kèm caption overlay phủ lên mọi cuộc họp.
           </p>
-        </div>
 
-        {/* Download Alert toast */}
-        {downloadSuccess && (
-          <div className="max-w-md mx-auto mb-8 p-4 rounded-2xl bg-emerald-600 text-white font-medium text-sm flex items-center gap-3 shadow-lg shadow-emerald-600/20 animate-in fade-in zoom-in-95">
-            <CheckCircle2 className="w-5 h-5 shrink-0" />
-            <span>{downloadSuccess}</span>
-          </div>
-        )}
+          {/* Download Toast Notification */}
+          {downloadSuccess && (
+            <div className="mt-6 p-4 rounded-2xl bg-emerald-600 text-white font-medium text-sm flex items-center gap-3 shadow-lg shadow-emerald-600/20 max-w-md animate-in fade-in">
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
+              <span>{downloadSuccess}</span>
+            </div>
+          )}
 
-        {/* Download Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-20">
-          {platforms.map((p, idx) => (
-            <div
-              key={idx}
-              className="rounded-3xl border border-stone-200 bg-white p-7 sm:p-9 shadow-sm hover:shadow-xl hover:shadow-emerald-600/10 hover:border-emerald-200 transition-all duration-300 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="p-3.5 rounded-2xl bg-emerald-50 text-emerald-700">
-                    <p.icon className="w-7 h-7" />
-                  </div>
-                  <span className="px-3 py-1 rounded-full bg-stone-100 text-stone-600 font-semibold text-xs">
-                    {p.version}
+          {/* Download Platform Buttons Grid */}
+          <div className="mt-10">
+            <div className="flex flex-wrap items-center gap-3.5">
+              {builds.map((b) => (
+                <button
+                  key={b.platform}
+                  type="button"
+                  onClick={() => handleDownload(b)}
+                  disabled={downloadingPlatform !== null}
+                  className={`inline-flex items-center justify-center gap-3 rounded-2xl px-6 py-3.5 text-[15px] font-semibold transition-all duration-200 active:scale-98 ${
+                    b.isRecommended
+                      ? 'bg-stone-900 text-white hover:bg-emerald-600 shadow-sm'
+                      : 'border border-stone-200 bg-white text-stone-700 hover:border-emerald-300 hover:bg-emerald-50/40'
+                  }`}
+                >
+                  <Download className="w-4 h-4 text-emerald-400" />
+                  <span>{b.name}</span>
+                  <span className={`text-xs font-normal ${b.isRecommended ? 'text-stone-400' : 'text-stone-400'}`}>
+                    {b.size}
                   </span>
-                </div>
-
-                <h3 className="text-2xl font-bold text-stone-900 mb-1">{p.os}</h3>
-                <p className="text-xs text-stone-500 font-medium mb-6">{p.requires}</p>
-
-                <div className="space-y-3">
-                  {p.options.map((opt, oIdx) => (
-                    <button
-                      key={oIdx}
-                      type="button"
-                      onClick={() => handleDownload(`${p.os} (${opt.label})`)}
-                      className={`w-full py-3.5 px-4 rounded-2xl font-semibold text-xs sm:text-sm flex items-center justify-between transition-all duration-200 active:scale-98 ${
-                        oIdx === 0
-                          ? 'bg-stone-900 hover:bg-emerald-600 text-white shadow-md'
-                          : 'bg-stone-100 hover:bg-stone-200 text-stone-800'
-                      }`}
-                    >
-                      <span>{opt.label}</span>
-                      <Download className="w-4 h-4" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-8 pt-5 border-t border-stone-100 flex items-center justify-between text-xs text-stone-400 font-medium">
-                <span className="flex items-center gap-1">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  Đã quét virus &amp; Chữ ký số an toàn
-                </span>
-              </div>
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Feature Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-10 border-t border-stone-200">
-          {highlights.map((h, idx) => (
-            <div key={idx} className="rounded-3xl bg-white border border-stone-200/80 p-6 sm:p-7 shadow-sm">
-              <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600 w-fit mb-4">
-                <h.icon className="w-5 h-5" />
-              </div>
-              <h4 className="text-lg font-bold text-stone-900 mb-2">{h.title}</h4>
-              <p className="text-sm text-stone-600 font-medium leading-relaxed">
-                {h.desc}
-              </p>
+            {/* Version and Integrity Note */}
+            <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-stone-400 font-medium">
+              <span>Phiên bản v2.4.0</span>
+              <span>Cập nhật ngày: 24/08/2026</span>
+              <span className="flex items-center gap-1.5 text-emerald-700">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                Đã ký số an toàn (Apple Notarized & Microsoft Certified)
+              </span>
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* 2. Feature Cards Section */}
+      <section className="border-b border-stone-200 bg-stone-50/40">
+        <div className="max-w-6xl mx-auto px-6 sm:px-10 py-16 lg:py-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            {featureCards.map((feat, idx) => (
+              <div
+                key={idx}
+                className="rounded-3xl border border-stone-200/90 bg-white p-7 sm:p-8 flex flex-col justify-between shadow-xs"
+              >
+                <div>
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-6">
+                    <feat.icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-stone-900 mb-3 leading-snug">
+                    {feat.title}
+                  </h3>
+                  <p className="text-sm font-normal text-stone-600 leading-relaxed">
+                    {feat.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
